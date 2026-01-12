@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<title>Kalkulator ceny uszczelek – materiał + cięcie</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+    }
+    .container {
+        max-width: 520px;
+        margin: 0 auto;
+        background: white;
+        padding: 2.2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.08);
+    }
+    h1 {
+        text-align: center;
+        color: #1a3c6d;
+        margin-top: 0;
+        margin-bottom: 1.8rem;
+    }
+    .form-group {
+        margin-bottom: 1.4rem;
+    }
+    label {
+        display: block;
+        margin-bottom: 0.45rem;
+        font-weight: 600;
+        color: #444;
+    }
+    input[type="number"], input[type="checkbox"] {
+        vertical-align: middle;
+    }
+    input[type="number"] {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1.05rem;
+        box-sizing: border-box;
+    }
+    input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    }
+    .row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+    .row input {
+        flex: 1;
+    }
+    .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 1.2rem 0;
+        font-size: 1.05rem;
+    }
+    .buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 2rem;
+    }
+    button {
+        flex: 1;
+        padding: 14px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+    #btn-normal { background: #2563eb; }
+    #btn-double { background: #dc2626; }
+    #result {
+        margin-top: 2.2rem;
+        padding: 20px;
+        background: #f0fdf4;
+        border: 2px solid #86efac;
+        border-radius: 12px;
+        font-size: 1.55rem;
+        font-weight: bold;
+        color: #166534;
+        text-align: center;
+        min-height: 90px;
+    }
+    .info {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 1.6rem;
+        text-align: center;
+        line-height: 1.5;
+    }
+    .hidden {
+        display: none !important;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Kalkulator uszczelek</h1>
+   
+    <div class="form-group">
+        <label>Cena arkusza [zł] + 33% marży</label>
+        <input type="number" step="0.01" id="cenaArkusza" value="800" />
+    </div>
+    <div class="form-group">
+        <label>Wymiary arkusza [m]</label>
+        <div class="row">
+            <input type="number" step="0.001" id="arkuszX" value="1.5" />
+            ×
+            <input type="number" step="0.001" id="arkuszY" value="1.5" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Cena za 1 metr cięcia [zł]</label>
+        <input type="number" step="0.01" id="cenaZaMetr" value="6.7" />
+    </div>
+    <div class="checkbox-row">
+        <input type="checkbox" id="okragle" />
+        <label for="okragle" style="margin:0;">Okrągłe – materiał jak kwadrat o boku = średnica zewnętrzna</label>
+    </div>
+
+    <div class="form-group" id="group-wewnetrzna">
+        <label>Średnica wewnętrzna [m]</label>
+        <input type="number" step="0.001" id="srednicaWew" placeholder="średnica wewnętrzna" value="0.600" />
+    </div>
+    <div class="form-group" id="group-zewnetrzna">
+        <label>Średnica zewnętrzna [m]</label>
+        <input type="number" step="0.001" id="srednicaZew" placeholder="średnica zewnętrzna" value="0.670" />
+    </div>
+
+    <div id="group-prostokat">
+        <div class="form-group">
+            <label>Wewnętrzny wymiar [m]</label>
+            <div class="row">
+                <input type="number" step="0.001" id="wewX" placeholder="szerokość" value="0.600" />
+                ×
+                <input type="number" step="0.001" id="wewY" placeholder="wysokość" value="0.400" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Zewnętrzny wymiar [m]</label>
+            <div class="row">
+                <input type="number" step="0.001" id="zewX" placeholder="szerokość" value="0.640" />
+                ×
+                <input type="number" step="0.001" id="zewY" placeholder="wysokość" value="0.440" />
+            </div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button id="btn-normal" onclick="oblicz(false)">Oblicz NORMALNIE</button>
+        <button id="btn-double" onclick="oblicz(true)">Podwójne cięcie ×2</button>
+    </div>
+
+    <div id="result">Wpisz dane i kliknij przycisk</div>
+
+    <div class="info">
+        Materiał okrągłe = (cena arkusza × 1.33) ÷ (pow. arkusza / (Dzew × Dzew))<br>
+        Cięcie okrągłe = π × (Dzew + Dwew) × cena/m (×2 przy podwójnym cięciu)<br><br>
+        Prostokąt – bez zmian
+    </div>
+</div>
+
+<script>
+function toggleFields() {
+    const isOkragle = document.getElementById('okragle').checked;
+   
+    document.getElementById('group-prostokat').classList.toggle('hidden', isOkragle);
+    document.getElementById('group-wewnetrzna').classList.toggle('hidden', !isOkragle);
+    document.getElementById('group-zewnetrzna').classList.toggle('hidden', !isOkragle);
+}
+
+function oblicz(podwojne = false) {
+    const cenaArkusza = Number(document.getElementById('cenaArkusza').value) || 0;
+    const arkuszX = Number(document.getElementById('arkuszX').value) || 1;
+    const arkuszY = Number(document.getElementById('arkuszY').value) || 1;
+    const cenaZaMetr = Number(document.getElementById('cenaZaMetr').value) || 0;
+    const isOkragle = document.getElementById('okragle').checked;
+
+    const powArkusza = arkuszX * arkuszY;
+    let powUszczelki, obwod;
+
+    if (isOkragle) {
+        const Dwew = Number(document.getElementById('srednicaWew').value) || 0;
+        const Dzew = Number(document.getElementById('srednicaZew').value) || 0;
+        
+        // Materiał liczony jak KWADRAT o boku = średnica zewnętrzna
+        powUszczelki = Dzew * Dzew;
+        
+        // Cięcie nadal po obwodach okręgów
+        obwod = Math.PI * (Dwew + Dzew);
+    } else {
+        const wewX = Number(document.getElementById('wewX').value) || 0;
+        const wewY = Number(document.getElementById('wewY').value) || 0;
+        const zewX = Number(document.getElementById('zewX').value) || 0;
+        const zewY = Number(document.getElementById('zewY').value) || 0;
+        
+        powUszczelki = zewX * zewY;
+        obwod = 2 * (wewX + wewY + zewX + zewY);
+    }
+
+    const kosztMaterialu = (cenaArkusza * 1.33) / (powArkusza / powUszczelki);
+    const mnoznikCiecia = podwojne ? 2 : 1;
+    const kosztCiecia = obwod * cenaZaMetr * mnoznikCiecia;
+    
+    const calkowityKoszt = kosztMaterialu + kosztCiecia;
+    const wynik = calkowityKoszt.toFixed(2).replace('.', ',');
+
+    const text = podwojne
+        ? `Podwójne cięcie<br><big>${wynik} zł</big>`
+        : `Razem<br><big>${wynik} zł</big>`;
+
+    document.getElementById('result').innerHTML = text;
+}
+
+// Przełączanie pól
+document.getElementById('okragle').addEventListener('change', toggleFields);
+window.addEventListener('load', toggleFields);
+</script>
+</body>
+</html>
